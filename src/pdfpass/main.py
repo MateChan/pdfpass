@@ -8,7 +8,7 @@ from typed_argparse import Parser, TypedArgs, arg
 
 
 class Args(TypedArgs):
-    file_path: str = arg(positional=True, help="Path to the PDF file to encrypt")
+    file_paths: list[str] = arg(positional=True, help="PDF file paths to encrypt")
     user_password: Optional[str] = arg("-u", help="User password for the PDF")
     owner_password: Optional[str] = arg("-o", help="Owner password for the PDF")
 
@@ -22,8 +22,8 @@ def success_print(msg: str):
 
 
 def cli(args: Args):
-    if not os.path.isfile(args.file_path):
-        error_print(f"The file '{args.file_path}' does not exist.")
+    if not args.file_paths:
+        error_print("At least one PDF file path is required.")
         exit(1)
 
     try:
@@ -60,16 +60,21 @@ def cli(args: Args):
         ),
     )
 
-    new_file_path = os.path.splitext(args.file_path)[0] + "-pass.pdf"
+    for file_path in args.file_paths:
+        if not os.path.isfile(file_path):
+            error_print(f"The file '{file_path}' does not exist.")
+            continue
 
-    try:
-        with pikepdf.open(args.file_path) as pdf:
-            pdf.save(new_file_path, encryption=encryption)
-    except pikepdf.PdfError as e:
-        error_print(f"Failed to encrypt PDF: {e}")
-        exit(1)
+        new_file_path = os.path.splitext(file_path)[0] + "-pass.pdf"
 
-    success_print(f"Encrypted PDF saved as '{new_file_path}'.")
+        try:
+            with pikepdf.open(file_path) as pdf:
+                pdf.save(new_file_path, encryption=encryption)
+        except pikepdf.PdfError as e:
+            error_print(f"Failed to encrypt PDF: {e}")
+            continue
+
+        success_print(f"Encrypted PDF saved as '{new_file_path}'.")
 
 
 def main():
