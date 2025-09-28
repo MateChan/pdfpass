@@ -1,16 +1,25 @@
 import os
 import sys
-from typing import Optional
+from dataclasses import dataclass
+from typing import Annotated, Optional
 
 import pikepdf
+import tyro
 from pikepdf import Encryption, Permissions
-from typed_argparse import Parser, TypedArgs, arg
 
 
-class Args(TypedArgs):
-    file_paths: list[str] = arg(positional=True, help="PDF file paths to encrypt")
-    user_password: Optional[str] = arg("-u", help="User password for the PDF")
-    owner_password: Optional[str] = arg("-o", help="Owner password for the PDF")
+@dataclass
+class Args:
+    """...in some lab somewhere, this would be extremely useful, shouldn't it?"""
+
+    # Paths to PDF files to encrypt.
+    file_paths: tyro.conf.Positional[list[str]]
+
+    # User password for PDF encryption.
+    user_password: Annotated[Optional[str], tyro.conf.arg(aliases=["-u"])] = None
+
+    # Owner password for PDF encryption.
+    owner_password: Annotated[Optional[str], tyro.conf.arg(aliases=["-o"])] = None
 
 
 def error_print(msg: str):
@@ -78,10 +87,8 @@ def cli(args: Args):
 
 
 def main():
-    Parser(
-        Args,
-        description="...in some lab somewhere, this would be extremely useful, shouldn't it?",
-    ).bind(cli).run()
+    args = tyro.cli(Args)
+    cli(args)
 
 
 if __name__ == "__main__":
