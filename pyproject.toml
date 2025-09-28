@@ -1,13 +1,10 @@
 [project]
 name = "pdfpass"
-version = "0.1.0"
+version = "0.1.1"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "pikepdf>=9.9.0",
-    "tyro>=0.9.32",
-]
+dependencies = ["pikepdf>=9.9.0", "tyro>=0.9.32"]
 
 [project.scripts]
 pdfpass = "pdfpass.main:main"
